@@ -1,6 +1,6 @@
 # Batch-o-mark — Batch Image Watermarking Tool
 
-Watermarker is a **local web app** for batch watermarking photos. It supports **text and image watermarks**, **EXIF date macros**, **multi-core processing**, and **preserves your original folder structure**. A **live preview** panel helps you fine-tune a template before batch processing.
+Watermarker is a **local web app** for batch watermarking photos. It supports **text and image watermarks**, **EXIF date macros**, **multi-core processing**, and **preserves your original folder structure**. A **live preview** panel helps you fine-tune a template before batch processing. Supports directories with up to 50 000 pictures by default 
 
 > Runs entirely on your machine. No cloud uploads.
 
