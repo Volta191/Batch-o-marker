@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WaterMPack</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>WaterMPack</h1>
+      <p>Local folder processing (server) with a preview of the first image on the right. Templates and EXIF macros are supported.</p>
+    </header>
+
+    <section class="grid grid-2" id="mainGrid">
+      <div class="stack">
+        <div class="card" id="tplCard">
+          <div class="card-head">
+            <h2>Templates</h2>
+            <button id="toggleTpl" class="ghost" title="Collapse/Expand">▾</button>
+          </div>
+
+          <div id="tplBody">
+            <div class="row">
+              <label>Saved templates</label>
+              <select id="tplList"></select>
+              <button id="refreshTpls">Refresh</button>
+              <button id="deleteTpl" class="danger">Delete</button>
+            </div>
+
+            <h3>Save / Update</h3>
+            <div class="row">
+              <label>Template name</label>
+              <input id="tplName" placeholder="e.g., logo_bottom_right" />
+            </div>
+            <div class="row">
+              <label>Type</label>
+              <select id="tplType">
+                <option value="text">Text</option>
+                <option value="image">Image</option>
+              </select>
+            </div>
+            <div class="row" id="textFields">
+              <label>Text</label>
+              <input id="tplText" placeholder="© My Brand {date:%Y-%m-%d}" />
+              <div class="row-inline">
+                <label>Text color</label>
+                <input id="tplColor" type="color" value="#ffffff" />
+                <input id="tplColorHex" placeholder="#ffffff" value="#ffffff" />
+              </div>
+              <label>Font</label>
+              <input type="file" id="fontFile" accept=".ttf,.otf,.ttc" />
+              <small>Macros: <code>{date}</code>, <code>{date:%m-%d-%Y %H:%M}</code></small>
+            </div>
+            <div class="row" id="imageFields" style="display:none;">
+              <label>Watermark file (PNG with alpha channel recommended)</label>
+              <input type="file" id="wmImage" accept="image/*" />
+            </div>
+
+            <div class="row two">
+              <div>
+                <label>Position</label>
+                <select id="tplPosition">
+                  <option value="bottom-right">Bottom right</option>
+                  <option value="bottom-left">Bottom left</option>
+                  <option value="top-right">Top right</option>
+                  <option value="top-left">Top left</option>
+                  <option value="center">Center</option>
+                  <option value="tile">Tile</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row">
+              <label>Scale (percentage of image width)</label>
+              <div class="slider-row">
+                <input id="tplScaleRange" type="range" min="0.02" max="1" step="0.01" value="0.2" />
+                <input id="tplScale" type="number" step="0.01" value="0.2" />
+              </div>
+            </div>
+
+            <div class="row">
+              <label>Opacity (0–1)</label>
+              <div class="slider-row">
+                <input id="tplOpacityRange" type="range" min="0" max="1" step="0.01" value="0.25" />
+                <input id="tplOpacity" type="number" step="0.01" value="0.25" />
+              </div>
+            </div>
+
+            <div class="row">
+              <label>Margin (px)</label>
+              <div class="slider-row">
+                <input id="tplMarginRange" type="range" min="0" max="400" step="1" value="16" />
+                <input id="tplMargin" type="number" step="1" value="16" />
+              </div>
+            </div>
+
+            <div class="row">
+              <label>Rotation angle (degrees)</label>
+              <div class="slider-row">
+                <input id="tplRotationRange" type="range" min="-180" max="180" step="1" value="0" />
+                <input id="tplRotation" type="number" step="1" value="0" />
+              </div>
+            </div>
+
+            <div class="row">
+              <label>Tile gap (px)</label>
+              <div class="slider-row">
+                <input id="tplTileGapRange" type="range" min="10" max="600" step="1" value="80" />
+                <input id="tplTileGap" type="number" step="1" value="80" />
+              </div>
+            </div>
+
+            <div class="row">
+              <button id="saveTpl" class="primary">Save template</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Batch watermarking (local folder)</h2>
+          <div class="row">
+            <label>Source folder (absolute path)</label>
+            <input id="inputDir" placeholder="C:\Pictures\RAW" />
+          </div>
+          <div class="row">
+            <label>Template to apply</label>
+            <select id="tplForRun"></select>
+          </div>
+          <div class="row">
+            <label>Format</label>
+            <select id="outFormat">
+              <option value="KEEP">Same as source</option>
+              <option value="JPEG">JPEG</option>
+              <option value="PNG">PNG</option>
+              <option value="WEBP">WEBP</option>
+              <option value="BMP">BMP</option>
+              <option value="TIFF">TIFF</option>
+            </select>
+          </div>
+          <div class="row">
+            <label>Quality (for JPEG/WEBP)</label>
+            <input id="outQuality" type="number" min="1" max="100" value="90" />
+          </div>
+
+          <div class="row two">
+            <div>
+              <label>Where to save</label>
+              <select id="saveMode">
+                <option value="ZIP">ZIP (download archive)</option>
+                <option value="DIR">Local folder</option>
+              </select>
+            </div>
+            <div id="outDirRow" style="display:none;">
+              <label>Destination folder</label>
+              <input id="outputDir" placeholder="C:\Pictures\watermarked" />
+              <label class="inline"><input type="checkbox" id="overwrite" checked /> Overwrite existing files</label>
+              <label class="inline"><input type="checkbox" id="openWhenDone" /> Open destination folder when finished</label>
+            </div>
+          </div>
+
+          <div class="row">
+  <button id="processLocalBtn" class="primary"><span class="btn-text">Start watermarking</span></button>
+  <button id="stopBtn" class="ghost danger" style="margin-left:8px;"><span class="btn-text">Stop</span></button>
+</div>
+
+
+          <div class="row" id="progressRow" style="display:none;">
+            <label>Progress</label>
+            <div class="progress"><div class="bar" id="progressBar" style="width:0%"></div></div>
+            <div id="progressText">0/0</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card sticky" id="previewCard">
+        <h2>Preview (first image in folder)</h2>
+        <div class="row">
+          <button id="previewLocalBtn" class="primary">Update preview</button>
+          <small>The first image found (recursively) is used; the selected saved template is applied.</small>
+        </div>
+        <div class="preview-wrap">
+          <img id="previewImg" alt="Preview will appear here" />
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <small>Runs locally with FastAPI. Templates are stored on the server in JSON.</small>
+    </footer>
+  </div>
+
+  <div id="toaster" aria-live="polite" aria-atomic="true"></div>
+
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
