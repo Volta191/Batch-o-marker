@@ -52,7 +52,7 @@ watermarker/
 
 ## 📦 Installation
 
-### Windows / macOS / Linux
+### Windows / Linux
 
 ```bash
 # 1) Clone
@@ -84,6 +84,83 @@ uvicorn main:app
 
 > If you want auto-reload while developing (hot reload), use `uvicorn main:app --reload`.
 > On Windows, `--reload` may pull extra dev deps; if pip complains, run without `--reload`.
+
+---
+Окей, тогда сделаем на английском и в твоём стиле README, чтобы подходило для GitHub.
+
+⸻
+
+
+## 🚀 Running on macOS
+
+### 1. Install Python 3.10+ (if not already installed)
+It’s recommended to use [Homebrew](https://brew.sh/):
+```bash
+brew install python
+
+Check the version:
+
+python3 --version
+
+```
+⸻
+
+2. Clone the repository
+```bash
+git clone https://github.com/username/batch-o-mark.git
+cd batch-o-mark
+```
+
+⸻
+
+3. Create and activate a virtual environment
+```
+python3 -m venv .venv
+source .venv/bin/activate
+```
+Use deactivate to exit the virtual environment.
+
+⸻
+
+4. Upgrade pip and install dependencies
+```bash
+pip install --upgrade pip setuptools wheel
+pip install -r requirements.txt
+```
+
+⸻
+
+5. Run the application
+```bash
+uvicorn main:app --reload
+```
+Once started, open your browser and go to:
+
+http://127.0.0.1:8000
+
+
+⸻
+
+6. Build a binary for macOS (optional)
+
+If you want to bundle the app into a standalone binary or .app:
+```
+pip install pyinstaller
+pyinstaller --name "batch-o-mark" --add-data "static:static" --add-data "templates_store:templates_store" main.py
+```
+The build output will be located in:
+
+dist/batch-o-mark
+
+
+⸻
+
+Notes
+	•	If you get compilation errors for Pillow or other dependencies, make sure Xcode Command Line Tools are installed:
+```
+xcode-select --install
+```
+  • On macOS, the app may run faster than on Windows due to optimizations in system libraries.
 
 ---
 
