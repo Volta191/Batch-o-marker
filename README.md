@@ -4,7 +4,7 @@ Watermarker is a **local web app** for batch watermarking photos. It supports **
 
 > Runs entirely on your machine. No cloud uploads.
 
-## Recent [Release](https://github.com/Volta191/Batch-o-marker/releases). Compiled for Windows 
+## [Recent Release](https://github.com/Volta191/Batch-o-marker/releases). Compiled for Windows 
 ---
 
 ## ✨ Features
