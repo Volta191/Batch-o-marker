@@ -23,6 +23,7 @@ from fastapi.staticfiles import StaticFiles
 # -----------------------------
 # Environment / Executor
 # -----------------------------
+
 IS_FROZEN = getattr(sys, "frozen", False)  # True in PyInstaller exe
 EXECUTOR = ThreadPoolExecutor if IS_FROZEN else ProcessPoolExecutor
 
@@ -35,10 +36,22 @@ STORE_DIR = APP_DIR / "templates_store"
 IMAGES_DIR = STORE_DIR / "images"
 FONTS_DIR = STORE_DIR / "fonts"
 TEMPLATES_JSON = STORE_DIR / "templates.json"
+DEFAULT_FONT = APP_DIR / "templates_store" / "fonts" / "DejaVuSans.ttf"
+SYSTEM_FONTS_CANDIDATES = [
+    DEFAULT_FONT,  # наш вшитый, абсолютный путь
+    Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
+    Path("/Library/Fonts/Arial Unicode.ttf"),
+    Path("/Library/Fonts/Arial.ttf"),
+    Path.home() / ".fonts" / "DejaVuSans.ttf",
+]
+print("DEFAULT_FONT:", DEFAULT_FONT)
+print("DEFAULT_FONT exists:", DEFAULT_FONT.exists())
+
 
 # -----------------------------
 # Global job state
 # -----------------------------
+
 JOBS: Dict[str, Dict[str, Any]] = {}
 JOBS_LOCK = threading.Lock()
 
@@ -56,6 +69,7 @@ app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 # -----------------------------
 # Store helpers
 # -----------------------------
+
 def ensure_store():
     IMAGES_DIR.mkdir(parents=True, exist_ok=True)
     FONTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -76,6 +90,7 @@ def save_templates(d):
 # -----------------------------
 # EXIF + Macros
 # -----------------------------
+
 EXIF_TAGS = {v: k for k, v in ExifTags.TAGS.items()}
 
 def _parse_exif_datetime(s: str):
@@ -126,6 +141,33 @@ def expand_text_macros(text: str, img_path: str, img: Image.Image) -> str:
 # -----------------------------
 # Watermark helpers
 # -----------------------------
+
+def _clean_user_font_path(p):
+    """Нормализуем то, что приходит из JSON/форм: '', 'null', 'None' -> None."""
+    if not p:
+        return None
+    if isinstance(p, str) and p.strip().lower() in {"", "null", "none"}:
+        return None
+    return p
+
+def pick_font_path(user_font_path: str | None) -> str | None:
+    p = _clean_user_font_path(user_font_path)
+    if p:
+        up = Path(p)
+        # делаем абсолютным относительно директории приложения
+        if not up.is_absolute():
+            up = (APP_DIR / up).resolve()
+        if up.exists():
+            return str(up)
+    # дальше candidates (включая абсолютный DEFAULT_FONT)
+    for cand in SYSTEM_FONTS_CANDIDATES:
+        try:
+            if cand and Path(cand).exists():
+                return str(Path(cand).resolve())
+        except Exception:
+            continue
+    return None
+
 def parse_hex_color(s: Optional[str], default=(255, 255, 255)):
     if not s:
         return default
@@ -145,25 +187,16 @@ def parse_hex_color(s: Optional[str], default=(255, 255, 255)):
         return default
 
 def build_text_watermark_layer(base_w, base_h, text, font_path, scale, opacity, rotation, color_hex):
-    # Choose font
+    # --- Choose font ---
     try:
-        if font_path and Path(font_path).exists():
-            trial_font = font_path
-        else:
-            possible = [
-                str(Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf")),
-                str(Path("/Library/Fonts/Arial Unicode.ttf")),
-                str(Path("/Library/Fonts/Arial.ttf")),
-                str(Path.home() / ".fonts/DejaVuSans.ttf"),
-            ]
-            trial_font = next((p for p in possible if Path(p).exists()), None)
-        if trial_font:
+        candidate = pick_font_path(font_path)  # функция из предыдущего сообщения
+        if candidate:
             lo, hi = 8, 2000
             target_w = max(10, int(base_w * max(0.02, min(scale, 1.0))))
             chosen = 64
             while lo <= hi:
                 mid = (lo + hi) // 2
-                f = ImageFont.truetype(trial_font, size=mid)
+                f = ImageFont.truetype(candidate, size=mid)
                 x0, y0, x1, y1 = f.getbbox(text)
                 w = x1 - x0
                 if w < target_w:
@@ -171,24 +204,27 @@ def build_text_watermark_layer(base_w, base_h, text, font_path, scale, opacity, 
                     lo = mid + 1
                 else:
                     hi = mid - 1
-            font = ImageFont.truetype(trial_font, size=chosen)
+            font = ImageFont.truetype(candidate, size=chosen)
         else:
             font = ImageFont.load_default()
     except Exception:
         font = ImageFont.load_default()
 
-    # exact bbox + safety padding
+    # --- exact bbox + safety padding ---
     x0, y0, x1, y1 = font.getbbox(text)
     text_w, text_h = (x1 - x0), (y1 - y0)
+
+    # увеличиваем паддинг, чтобы не обрезало тени / выступающие части букв
     base_pad = max(2, int(min(base_w, base_h) * 0.01))
     shadow_offset = max(1, int(base_pad * 0.6))
-    pad = base_pad + shadow_offset + 2
+    pad = base_pad + shadow_offset + 4  # добавил +4 px запаса
 
     layer = Image.new("RGBA", (text_w + pad * 2, text_h + pad * 2), (0, 0, 0, 0))
     draw = ImageDraw.Draw(layer)
 
-    # compensate bbox origin to avoid clipping
+    # компенсируем смещение bbox (иначе срезает верх/низ)
     ox, oy = (-x0 + pad, -y0 + pad)
+
     # shadow (black)
     draw.text((ox + shadow_offset, oy + shadow_offset), text, font=font, fill=(0, 0, 0, int(255 * opacity)))
     # main text color
@@ -197,6 +233,7 @@ def build_text_watermark_layer(base_w, base_h, text, font_path, scale, opacity, 
 
     if rotation:
         layer = layer.rotate(rotation, expand=True)
+
     return layer
 
 def build_image_watermark_layer(base_w, base_h, wm_path, scale, opacity, rotation):

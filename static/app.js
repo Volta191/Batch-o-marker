@@ -8,30 +8,43 @@ function applyTheme(theme) {
     const isDark = theme === 'dark';
     btn.setAttribute('aria-pressed', String(isDark));
     btn.textContent = isDark ? '🌙' : '☀️';
-    btn.title = isDark ? 'Switch to light (T)' : 'Switch to dark (T)';
+    btn.title = isDark ? 'Switch to light (Alt+T)' : 'Switch to dark (Alt+T)';
   }
 }
+
 function initTheme() {
   const saved = localStorage.getItem('wm_theme');
-  let theme = saved;
-  if (!theme) {
-    theme = (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches)
-      ? 'light' : 'dark';
-  }
-  applyTheme(theme);
+  const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+  applyTheme(saved || (prefersLight ? 'light' : 'dark'));
+
   const toggle = () => {
-    const next = (document.documentElement.getAttribute('data-theme') === 'dark') ? 'light' : 'dark';
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = (cur === 'dark') ? 'light' : 'dark';
     localStorage.setItem('wm_theme', next);
     applyTheme(next);
   };
+
   const btn = document.getElementById('themeToggle');
   if (btn) btn.addEventListener('click', toggle);
-  document.addEventListener('keydown', (e) => {
-    if (e.key.toLowerCase() === 't' && !e.altKey && !e.ctrlKey && !e.metaKey) {
-      e.preventDefault(); toggle();
-    }
-  });
+
+  // защита: не вешаем обработчик повторно, если initTheme вызовут ещё раз
+  if (!window.__wmThemeHotkeyBound) {
+    window.__wmThemeHotkeyBound = true;
+    document.addEventListener('keydown', (e) => {
+      const tag = (e.target?.tagName || '').toLowerCase();
+      const isTyping = e.target?.isContentEditable || tag === 'input' || tag === 'textarea' || tag === 'select';
+      if (isTyping) return;
+
+      // Alt+T
+      if (e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey && (e.key?.toLowerCase() === 't')) {
+        e.preventDefault();
+        toggle();
+      }
+    });
+  }
 }
+
+
 
 // ========================
 // TOASTS & LOADING
