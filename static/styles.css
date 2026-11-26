@@ -1,6 +1,5 @@
 /* THEME TOKENS */
 :root {
-  /* default (будет переопределено через [data-theme]) */
   --bg:#0b0f14;
   --card:#121821;
   --text:#e7edf5;
@@ -18,9 +17,9 @@
 
   --transition-fast: .15s ease;
   --transition-slow: .25s ease;
+  --tpl-collapsed-h: 56px;
 }
 
-/* Dark theme */
 :root[data-theme="dark"] {
   --bg:#0b0f14;
   --card:#121821;
@@ -34,7 +33,6 @@
   --shadow: 0 8px 24px rgba(0,0,0,.35);
 }
 
-/* Light theme */
 :root[data-theme="light"] {
   --bg:#f6f8fb;
   --card:#ffffff;
@@ -53,34 +51,40 @@
 html,body{height:100%}
 body{
   margin:0; background:var(--bg); color:var(--text);
-  font:16px/1.45 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Inter,Arial,Noto Sans,sans-serif;
+  font:15px/1.45 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Inter,Arial,Noto Sans,sans-serif;
   transition: background-color var(--transition-slow), color var(--transition-slow);
 }
-.container{max-width:1600px; margin:0 auto; padding:24px}
-header{
-  display:flex; flex-direction:column; gap:6px; margin-bottom:6px;
+.container{max-width:1640px; margin:0 auto; padding:20px 24px}
+
+header{margin-bottom:10px}
+.header-bar{
+  display:flex; align-items:flex-start; justify-content:space-between; gap:16px;
 }
-header .header-actions{
-  display:flex; gap:8px; margin-left:auto;
-}
-header h1{margin:0; font-size:28px}
-header p{margin:0 0 8px 0; color:var(--muted)}
+header .header-actions{display:flex; gap:8px; flex-shrink:0}
+header h1{margin:0; font-size:26px}
+header p{margin:4px 0 0 0; color:var(--muted); font-size:14px}
+
 .grid{display:grid; gap:16px}
-.grid-2{grid-template-columns:0.7fr 1.3fr}
-.stack{display:grid; gap:16px}
+.grid-2{grid-template-columns:0.75fr 1.25fr}
+.stack{display:grid; gap:16px; grid-auto-rows:max-content}
+#mainGrid > *{ min-width:0; }
 
 .card{
   background:var(--card); border:1px solid var(--border);
   border-radius:var(--radius); padding:16px; box-shadow:var(--shadow);
   transition: background-color var(--transition-slow), border-color var(--transition-slow), box-shadow var(--transition-slow);
 }
-.card-head{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px}
+.card-head{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px}
+.card-head h2{margin:0}
 .sticky{position:sticky; top:16px; align-self:start}
 
+.preview-toolbar{
+  display:flex; flex-direction:column; gap:6px; margin-bottom:10px;
+}
 .preview-wrap{
   position: relative;
   width: 100%;
-  height: calc(100vh - 220px);
+  height: calc(100vh - 230px);
   min-height: 360px;
   padding: 8px;
   border: 1px dashed var(--border);
@@ -99,36 +103,48 @@ header p{margin:0 0 8px 0; color:var(--muted)}
   display: block;
   border-radius: var(--radius-xs);
 }
+.preview-loader{
+  position:absolute;
+  bottom:12px;
+  right:12px;
+  padding:6px 10px;
+  border-radius:var(--radius-xs);
+  background:color-mix(in oklab, var(--card) 88%, transparent);
+  border:1px solid var(--border);
+  font-size:12px;
+  color:var(--muted);
+}
 
 /* Typography & layout */
-h2{margin:0 0 12px 0}
-h3{margin:16px 0 8px 0; color:var(--muted); font-weight:600}
+h2{margin:0 0 12px 0; font-size:18px}
+h3{margin:14px 0 8px 0; color:var(--muted); font-weight:600; font-size:14px}
 .row{display:flex; flex-direction:column; gap:6px; margin-bottom:12px}
-.row-inline{display:flex; align-items:center; gap:8px}
+.row-inline{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
 .two{grid-template-columns:1fr 1fr; display:grid; gap:12px}
-.inline{display:inline-flex; align-items:center; gap:6px}
+.inline{display:inline-flex; align-items:center; gap:6px; cursor:pointer}
 label{font-size:13px; color:var(--muted)}
+.muted{color:var(--muted); font-size:13px}
 
 /* Form controls */
 input, select, button{
-  padding:10px 12px; border-radius:var(--radius-sm); border:1px solid var(--border);
-  background:var(--input-bg); color:var(--text);
+  padding:9px 11px; border-radius:var(--radius-sm); border:1px solid var(--border);
+  background:var(--input-bg); color:var(--text); font-size:14px;
   transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast), transform .05s ease;
 }
-input[type="file"]{padding:8px}
-input[type="color"]{padding:0; border:none; background:transparent; width:40px; height:40px;}
+input[type="checkbox"]{padding:0; width:16px; height:16px; accent-color:var(--primary)}
+input[type="file"]{padding:7px}
+input[type="color"]{padding:0; border:none; background:transparent; width:38px; height:38px; cursor:pointer}
 input::placeholder{color:var(--muted)}
 select{
   appearance:none;
+  padding-right:30px;
   background-image:
     linear-gradient(45deg, transparent 50%, var(--muted) 50%),
-    linear-gradient(135deg, var(--muted) 50%, transparent 50%),
-    linear-gradient(to right, transparent, transparent);
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
   background-position:
-    calc(100% - 18px) calc(1em + 2px),
-    calc(100% - 13px) calc(1em + 2px),
-    calc(100% - 2.5em) 0.5em;
-  background-size: 5px 5px, 5px 5px, 1px 1.5em;
+    calc(100% - 16px) calc(50% - 2px),
+    calc(100% - 11px) calc(50% - 2px);
+  background-size: 5px 5px, 5px 5px;
   background-repeat: no-repeat;
 }
 input:focus, select:focus {
@@ -137,12 +153,14 @@ input:focus, select:focus {
 }
 
 .slider-row{display:flex; align-items:center; gap:12px}
-.slider-row input[type="number"]{width:110px}
-input[type="range"]{accent-color: var(--primary);}
+.slider-row input[type="range"]{flex:1}
+.slider-row input[type="number"]{width:96px}
+input[type="range"]{accent-color: var(--primary); padding:0; border:none; background:transparent}
 
 /* Buttons */
 button{cursor:pointer}
 button:active{transform:translateY(1px)}
+button:disabled, button.is-disabled{opacity:.45; pointer-events:none}
 button.primary{
   background:linear-gradient(180deg,color-mix(in oklab, var(--primary) 90%, #fff), var(--primary));
   border-color:var(--primary); color:#001018; font-weight:600
@@ -160,33 +178,52 @@ button.ghost:hover{
   border-color: color-mix(in oklab, var(--border) 60%, var(--text));
   color: color-mix(in oklab, var(--muted) 40%, var(--text));
 }
+button.ghost.active{
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.btn-link{
+  display:inline-block;
+  padding:8px 14px;
+  border-radius:var(--radius-sm);
+  background:var(--primary);
+  color:#001018;
+  font-weight:600;
+  text-decoration:none;
+  font-size:14px;
+}
 
-/* Theme toggle size */
-.theme-toggle { width:40px; height:40px; display:inline-flex; align-items:center; justify-content:center; font-size:18px; }
+.theme-toggle { width:40px; height:40px; padding:0; display:inline-flex; align-items:center; justify-content:center; font-size:18px; }
 
-/* Focus visible */
 :focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
-button:focus-visible, input:focus-visible, select:focus-visible {
-  box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 25%, transparent);
-}
 
 /* Progress */
+.progress-head{display:flex; justify-content:space-between; align-items:center}
 .progress{
   width:100%; height:14px; background:var(--progress-bg); border-radius:8px;
   border:1px solid var(--border); overflow:hidden;
-  transition: background-color var(--transition-slow), border-color var(--transition-slow);
 }
 .progress .bar{
   height:100%; width:0%;
   background:linear-gradient(90deg,color-mix(in oklab, var(--primary) 90%, #fff), var(--primary));
-  transition: width var(--transition-slow);
+  transition: width .15s linear;
+}
+.progress-stats{
+  display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;
+  font-size:13px;
+}
+.error-list{
+  margin:6px 0 0 0; padding:8px 10px 8px 24px;
+  max-height:160px; overflow:auto;
+  background:var(--input-bg); border:1px solid var(--border); border-radius:var(--radius-xs);
+  font-size:12px; color:var(--danger);
 }
 
 /* Footer */
-small{color:var(--muted)}
+small{color:var(--muted); font-size:12px}
 footer{margin-top:18px; color:var(--muted)}
 
 /* Scrollbars */
@@ -211,12 +248,14 @@ footer{margin-top:18px; color:var(--muted)}
   box-shadow: var(--shadow);
   padding: 10px 12px;
   min-width: 220px;
-  max-width: 360px;
+  max-width: 380px;
   display: grid;
-  gap: 6px;
+  gap: 4px;
   animation: toast-in .18s ease;
+  cursor: pointer;
 }
-.toast .title{ font-weight: 600; }
+.toast .title{ font-weight: 600; font-size:14px; }
+.toast .msg{ font-size:13px; word-break:break-word; }
 .toast.success{ border-color: color-mix(in oklab, var(--primary) 60%, var(--border)); }
 .toast.error{ border-color: color-mix(in oklab, var(--danger) 60%, var(--border)); }
 .toast.hide{ animation: toast-out .16s ease forwards; opacity: 0; }
@@ -244,72 +283,23 @@ button.loading::after{
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
 
-/* Responsive */
 @media (max-width: 980px){
   .grid-2{grid-template-columns:1fr}
   .sticky{position:static}
+  .two{grid-template-columns:1fr}
 }
 
-/* карточки слева складываются по фактической высоте */
-.stack{
-  display:grid;
-  gap:16px;
-  grid-auto-rows:max-content;
-}
-
-/* настраиваемая высота коллапса */
-:root { --tpl-collapsed-h: 56px; } /* можно 48–72px по вкусу */
-
-/* СИЛЬНЫЙ КОЛЛАПС: оставляем только шапку с заголовком и кнопкой */
 #tplCard.collapsed{
   height: var(--tpl-collapsed-h);
-  padding: 6px 10px;
+  padding: 10px 16px;
   overflow: hidden;
   box-sizing: border-box;
-  transition: height .15s ease, padding .15s ease;
 }
-
-/* в коллапсе тело скрываем */
 #tplCard.collapsed #tplBody{ display:none !important; }
-
-/* шапка компактная, в одну строку */
-#tplCard.collapsed .card-head{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:8px;
-  margin:0;
-  min-height:0;
-  padding:0;
-}
-
-/* ЗАГОЛОВОК ОСТАЁТСЯ ВИДИМЫМ */
-#tplCard.collapsed h2{
-  display:block;
-  margin:0;
-  font-size:14px;
-  line-height:1;
-  font-weight:600;
-  color:var(--muted);
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-/* кнопка-стрелка компактнее */
-#tplCard.collapsed .ghost{
-  width:28px; height:28px; line-height:26px;
-  padding:0; text-align:center;
-}
-
-/* чтобы колонки/карточки не распирало */
-#mainGrid > *{ min-width:0; }
-
-@media (max-width:980px){
-  /* поведение на мобилках не меняем */
-}
+#tplCard.collapsed .card-head{ margin:0; }
+#tplCard.collapsed h2{ font-size:15px; color:var(--muted); }
+#tplCard.collapsed .ghost{ width:28px; height:28px; padding:0; text-align:center; }
