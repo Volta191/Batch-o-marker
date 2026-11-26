@@ -1,8 +1,22 @@
 # Batch-o-mark — Batch Image Watermarking Tool
 
-Watermarker is a **local web app** for batch watermarking photos. It supports **text and image watermarks**, **EXIF date macros**, **multi-core processing**, and **preserves your original folder structure**. A **live preview** panel helps you fine-tune a template before batch processing. Supports directories with up to 50 000 pictures by default 
+Watermarker is a **desktop (`PySide6`) and local web (`FastAPI`) app** for batch watermarking large photo sets (3,000–10,000+ photos). It supports **text and image watermarks**, **EXIF date & filename macros**, **multi-core processing**, **EXIF/ICC preservation**, and **preserves your original folder structure**.
 
 > Runs entirely on your machine. No cloud uploads.
+
+## Desktop App (Windows & macOS)
+
+```bash
+pip install -r requirements-desktop.txt
+python desktop_app.py
+```
+
+Build standalone `.exe` / `.app` locally:
+```bash
+pip install -r requirements-desktop.txt pyinstaller
+pyinstaller --clean --noconfirm Batch-o-mark.spec
+```
+Or trigger the **Build Desktop Apps (Windows & macOS)** GitHub Actions workflow in `.github/workflows/build.yml` to download ready-made `Batch-o-mark-windows-x64.zip` and `Batch-o-mark-macos.zip`.
 
 ## [Recent Release](https://github.com/Volta191/Batch-o-marker/releases). Compiled for Windows 
 ---

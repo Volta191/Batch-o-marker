@@ -1,0 +1,49 @@
+name: Build Desktop Apps (Windows & macOS)
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-desktop.txt pyinstaller
+      - name: Build Windows app
+        run: pyinstaller --clean --noconfirm Batch-o-mark.spec
+      - name: Package Windows ZIP
+        shell: pwsh
+        run: Compress-Archive -Path dist/Batch-o-mark/* -DestinationPath Batch-o-mark-windows-x64.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Batch-o-mark-windows-x64
+          path: Batch-o-mark-windows-x64.zip
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          pip3 install -r requirements-desktop.txt pyinstaller
+      - name: Build macOS app
+        run: pyinstaller --clean --noconfirm Batch-o-mark.spec
+      - name: Package macOS ZIP
+        run: ditto -c -k --sequesterRsrc --keepParent dist/Batch-o-mark.app Batch-o-mark-macos.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Batch-o-mark-macos
+          path: Batch-o-mark-macos.zip
