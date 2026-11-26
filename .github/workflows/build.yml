@@ -41,9 +41,9 @@ jobs:
           pip3 install -r requirements-desktop.txt pyinstaller
       - name: Build macOS app
         run: pyinstaller --clean --noconfirm Batch-o-mark.spec
-      - name: Package macOS ZIP
-        run: ditto -c -k --sequesterRsrc --keepParent dist/Batch-o-mark.app Batch-o-mark-macos.zip
+      - name: Package macOS DMG
+        run: hdiutil create -volname "Batch-o-mark" -srcfolder dist/Batch-o-mark.app -ov -format UDZO Batch-o-mark-macos.dmg
       - uses: actions/upload-artifact@v5
         with:
           name: Batch-o-mark-macos
-          path: Batch-o-mark-macos.zip
+          path: Batch-o-mark-macos.dmg
